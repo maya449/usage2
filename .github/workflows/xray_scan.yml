@@ -1,0 +1,32 @@
+name: Run Xray Scan
+
+on:
+  push:
+    branches:
+      - main   # ou la branche sur laquelle vous souhaitez exécuter les scans
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  xray_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout le code source
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # 2. Installer JFrog CLI
+      - name: Install JFrog CLI
+        run: |
+          curl -fL https://getcli.jfrog.io | sh
+          sudo mv jfrog /usr/local/bin/
+
+      # 3. Configurer JFrog CLI avec votre API Key
+      - name: Configure JFrog CLI
+        run: jfrog rt config --url https://<votre-instance-jfrog>.jfrog.io --apikey ${{ secrets.JFROG_API_KEY }}
+
+      # 4. Exécuter le scan Xray
+      - name: Run Xray Scan
+        run: jfrog xr scan --url https://<votre-instance-jfrog>.jfrog.io --project "GitHub-Project" --build "GitHub-Build"
